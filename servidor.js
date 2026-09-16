@@ -64,7 +64,7 @@ app.get('/treinos/:id', (req, res) => {
 // POST /treinos - cria um treino (400 se os dados forem invalidos)
 // ------------------------------------------------------------
 
-app.post('/treino',  (req, res) => {
+app.post('/treinos',  (req, res) => {
     const erro = validarTreino(req.body);
     
     if(erro!==null) {
@@ -87,8 +87,9 @@ app.post('/treino',  (req, res) => {
 // PUT /treinos/:id - substitui um treino
 // ------------------------------------------------------------
 
-app.put('/treino/:id', (req,res) => {
-    const id = number(req.params.id)
+
+app.put('/treinos/:id', (req,res) => {
+    const id = Number(req.params.id);
     const treino = treinos.find((t) => t.id === id);
     if(treino === undefined) {
         res.status(404).json({ erro : 'Treino não encontrado' });
