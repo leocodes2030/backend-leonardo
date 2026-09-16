@@ -72,12 +72,12 @@ app.post('/treinos',  (req, res) => {
     }
 
     const treino = {
-        id:proximoid,
-        nome:req.body.nome,
-        duracao:req.body.duracao
+        id : proximoId,
+        nome : req.body.nome,
+        duracao : req.body.duracao
     };
 
-    proximoid = proximoid+1;
+    proximoId = proximoId+1;
 
     treinos.push(treino);
     res.status(201).json(treino);
@@ -111,10 +111,10 @@ app.put('/treinos/:id', (req,res) => {
 // DELETE /treinos/:id - remove um treino
 // ------------------------------------------------------------
 
-app.delete ('treinos/:id', (req,res) => {
-    const id=number(req.params.id);
+app.delete ('/treinos/:id', (req,res) => {
+    const id=Number(req.params.id);
 
-    const pos = treinos.find((t) => t.id === id);
+    const pos = treinos.findIndex((t) => t.id === id);
 
     if(pos === -1) {
         return res.status(404).json({ erro : 'Treino não encontrado.' });

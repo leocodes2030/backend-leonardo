@@ -81,7 +81,7 @@ Content-Type: application/json
 
 
 ### 10 - Apagar o treino 2                 -> espera 204 (sem corpo)
-DELETE {{url}}/treinos/2
+DELETE {{url}}/treinos/1
 
 
 ### 11 - Apagar um treino que nao existe   -> espera 404
