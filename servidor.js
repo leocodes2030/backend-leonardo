@@ -111,7 +111,7 @@ app.put('/treinos/:id', (req,res) => {
 // DELETE /treinos/:id - remove um treino
 // ------------------------------------------------------------
 
-app.delete ('treino/:id', (req,res) => {
+app.delete ('treinos/:id', (req,res) => {
     const id=number(req.params.id);
 
     const pos = treinos.find((t) => t.id === id);
