@@ -31,8 +31,8 @@ function validarTreino(corpo) {
     if(typeof corpo.nome !== 'string' || corpo.nome == '') {
         return "O campo nome eh obrigatorio e deve ser um texto"
     }
-    // [PROF] Com < 0 a duracao 0 passa. O README pede maior que zero.
-    if(typeof corpo.duracao !== 'number' || corpo.duracao < 0) {
+    
+    if(typeof corpo.duracao !== 'number' || corpo.duracao <= 0) {
         return "o campo duracao eh obrigatorio e deve ser um numero maior que zero"
     }
     return null;
@@ -93,19 +93,15 @@ app.put('/treinos/:id', (req,res) => {
     const id = Number(req.params.id);
     const treino = treinos.find((t) => t.id === id);
     if(treino === undefined) {
-        // [PROF] Faltou o return. Sem ele o codigo continua descendo.
-        res.status(404).json({ erro : 'Treino não encontrado' });
+        return res.status(404).json({ erro : 'Treino não encontrado' });
     }
 
     const erro = validarTreino(req.body);
     
     if(erro !== null) {
-        // [PROF] Faltou o return aqui tambem.
-        res.status(400).json({ erro : erro})
+        return res.status(400).json({ erro : erro})
     }
 
-    // [PROF] treinos (o array) ou treino (o que voce achou)? Esse eh o unico teste que falta pra voce.
-    treinos.nome = req.body.nome;
     treino.duracao = req.body.duracao;
 
     res.status(200).json(treino)
