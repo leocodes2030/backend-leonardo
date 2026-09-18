@@ -102,6 +102,7 @@ app.put('/treinos/:id', (req,res) => {
         return res.status(400).json({ erro : erro})
     }
 
+    treino.nome = req.body.nome;
     treino.duracao = req.body.duracao;
 
     res.status(200).json(treino)
