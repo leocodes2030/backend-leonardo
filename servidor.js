@@ -53,18 +53,52 @@ function validarTreino(corpo) {
 
 // ------------------------------------------------------------
 // GET /treinos - lista todos os treinos
+// Aceita ?busca=texto e devolve so os treinos cujo nome contem
+// esse texto (LIKE). O % vai no valor, nunca dentro do SQL.
 // ------------------------------------------------------------
 
 app.get('/treinos', (req, res) => {
+    const { busca } = req.query;
+
+    if (busca) {
+        const treinos = db
+            .prepare('SELECT * FROM treinos WHERE nome LIKE ?')
+            .all(`%${busca}%`);
+        return res.status(200).json(treinos);
+    }
+
     const treinos = db.prepare('SELECT * FROM treinos').all();
     res.status(200).json(treinos);
 });
 
 // ------------------------------------------------------------
+// GET /treinos/resumo - total, minutos e media numa consulta so
+// Precisa vir ANTES de /treinos/:id, senao "resumo" seria
+// interpretado como um id.
+// ------------------------------------------------------------
+
+app.get('/treinos/resumo', (req, res) => {
+    const resumo = db
+        .prepare('SELECT COUNT(*) AS total, SUM(duracao) AS minutos, AVG(duracao) AS media FROM treinos')
+        .get();
+
+    res.status(200).json({
+        total: resumo.total,
+        minutos: resumo.minutos ?? 0,
+        media: resumo.media ?? 0
+    });
+});
+
+// ------------------------------------------------------------
 // GET /treinos/:id - busca um treino pelo id (404 se nao existir)
+// 400 se o id nao for um numero inteiro
 // ------------------------------------------------------------
 
 app.get('/treinos/:id', (req, res) => {
+    if (!Number.isInteger(Number(req.params.id))) {
+        return res.status(400).json({ erro: 'Id invalido. Deve ser um numero inteiro.' });
+    }
+
     const id = Number(req.params.id);
     const treino = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
     
