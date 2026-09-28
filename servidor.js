@@ -28,13 +28,6 @@ db.exec(`
 `);
 
 // ------------------------------------------------------------
-// Os dados moram aqui, na memoria. Somem quando o servidor cai.
-// (Na Aula 03 isso vira banco de dados.)
-// ------------------------------------------------------------
-const treinos = [];
-let proximoId = 1;
-
-// ------------------------------------------------------------
 // Validacao
 // Escreva a funcao validarTreino(corpo), que devolve a mensagem
 // de erro quando algo esta errado, ou null quando esta tudo certo.
@@ -52,23 +45,47 @@ function validarTreino(corpo) {
 }
 
 // ------------------------------------------------------------
-// GET /treinos - lista todos os treinos
-// Aceita ?busca=texto e devolve so os treinos cujo nome contem
-// esse texto (LIKE). O % vai no valor, nunca dentro do SQL.
+// GET /treinos - lista todos os treinos, do maior para o menor
+// Aceita ?minimo=40 (duracao >= minimo) e ?busca=texto (nome
+// contem o texto). O % vai no valor, nunca dentro do SQL.
 // ------------------------------------------------------------
 
 app.get('/treinos', (req, res) => {
-    const { busca } = req.query;
+    const { minimo, busca } = req.query;
 
-    if (busca) {
-        const treinos = db
-            .prepare('SELECT * FROM treinos WHERE nome LIKE ?')
-            .all(`%${busca}%`);
-        return res.status(200).json(treinos);
+    let sql = 'SELECT * FROM treinos';
+    const condicoes = [];
+    const valores = [];
+
+    if (minimo !== undefined) {
+        condicoes.push('duracao >= ?');
+        valores.push(Number(minimo));
     }
 
-    const treinos = db.prepare('SELECT * FROM treinos').all();
+    if (busca) {
+        condicoes.push('nome LIKE ?');
+        valores.push(`%${busca}%`);
+    }
+
+    if (condicoes.length > 0) {
+        sql += ' WHERE ' + condicoes.join(' AND ');
+    }
+
+    sql += ' ORDER BY duracao DESC';
+
+    const treinos = db.prepare(sql).all(...valores);
     res.status(200).json(treinos);
+});
+
+// ------------------------------------------------------------
+// GET /treinos/total - conta os treinos
+// Precisa vir ANTES de /treinos/:id, senao "total" seria
+// interpretado como um id.
+// ------------------------------------------------------------
+
+app.get('/treinos/total', (req, res) => {
+    const resultado = db.prepare('SELECT COUNT(*) AS total FROM treinos').get();
+    res.status(200).json(resultado);
 });
 
 // ------------------------------------------------------------
@@ -95,11 +112,12 @@ app.get('/treinos/resumo', (req, res) => {
 // ------------------------------------------------------------
 
 app.get('/treinos/:id', (req, res) => {
-    if (!Number.isInteger(Number(req.params.id))) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
         return res.status(400).json({ erro: 'Id invalido. Deve ser um numero inteiro.' });
     }
 
-    const id = Number(req.params.id);
     const treino = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
     
     if (treino === undefined) {
@@ -136,7 +154,6 @@ app.post('/treinos', (req, res) => {
 // PUT /treinos/:id - substitui um treino
 // ------------------------------------------------------------
 
-
 app.put('/treinos/:id', (req, res) => {
     const id = Number(req.params.id);
     
@@ -152,7 +169,8 @@ app.put('/treinos/:id', (req, res) => {
     
     db.prepare('UPDATE treinos SET nome = ?, duracao = ? WHERE id = ?')
         .run(req.body.nome, req.body.duracao, id);
-        const atualizado = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
+
+    const atualizado = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
     
     res.status(200).json(atualizado);
 });
