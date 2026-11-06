@@ -81,7 +81,7 @@ Content-Type: application/json
 
 
 ### 10 - Apagar o treino 2                 -> espera 204 (sem corpo)
-DELETE {{url}}/treinos/1
+DELETE {{url}}/treinos/2
 
 
 ### 11 - Apagar um treino que nao existe   -> espera 404
@@ -90,3 +90,62 @@ DELETE {{url}}/treinos/99999
 
 ### 12 - Listar de novo pra conferir       -> espera 200
 GET {{url}}/treinos
+
+
+
+### LOGIN COM DIEGO
+# @name login
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "usuario": "diego",
+  "senha": "1234"
+}
+
+###
+@token = {{login.response.body.token}}
+
+### VER PERFIL
+GET http://localhost:3000/perfil
+Authorization: Bearer {{token}}
+
+### LOGOUT
+POST http://localhost:3000/logout
+Authorization: Bearer {{token}}
+
+### PERFIL DEPOIS DO LOGOUT
+GET http://localhost:3000/perfil
+Authorization: Bearer {{token}}
+
+### LOGIN COM SENHA ERRADA
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "usuario": "diego",
+  "senha": "9999"
+}
+
+### LOGIN COM USUARIO INEXISTENTE
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "usuario": "inexistente",
+  "senha": "1234"
+}
+
+### LOGIN COM ALUNO
+# @name loginAluno
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "usuario": "aluno",
+  "senha": "senha"
+}
+
+### PERFIL DO ALUNO
+GET http://localhost:3000/perfil
+Authorization: {{loginAluno.response.body.token}}
